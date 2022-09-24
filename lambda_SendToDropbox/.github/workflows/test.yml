@@ -1,0 +1,26 @@
+name: Test for AWS Lambda
+
+on:
+  pull_request:
+    branches: main
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-20.04
+    timeout-minutes: 5
+    if: ${{ github.event.pull_request.merged == false }}
+
+    strategy:
+      matrix:
+        node-version: [12.x]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Run npm install
+        run: npm install
+
+      - name: Run unit test
+        run: npm run test

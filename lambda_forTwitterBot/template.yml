@@ -1,0 +1,38 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: twitter bot by lambda.
+Transform:
+  - AWS::Serverless-2016-10-31
+Resources:
+  forTwitterBot:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src/handlers/index.handler
+      Runtime: nodejs12.x
+      MemorySize: 128
+      Timeout: 100
+      Description: A Lambda function that returns a static string.
+      Policies:
+        - AWSLambdaBasicExecutionRole
+      Environment:
+        Variables:
+          API_KEY:
+            Ref: ApiKey
+          API_KEY_SECRET: 
+            Ref: ApiKeySecret
+          ACCESS_TOKEN:
+            Ref: AccessToken
+          ACCESS_TOKEN_SECRET: 
+            Ref: AccessTokenSecret
+          DYNAMO_TABLE_NAME: 
+            Ref: DynamoTableName
+Parameters:
+  ApiKey:
+    Type: String
+  ApiKeySecret:
+    Type: String
+  AccessToken:
+    Type: String
+  AccessTokenSecret:
+    Type: String
+  DynamoTableName:
+    Type: String

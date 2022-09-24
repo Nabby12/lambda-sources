@@ -1,0 +1,34 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: description
+Transform:
+  - AWS::Serverless-2016-10-31
+Resources:
+  SendToDropbox:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src/handlers/index.handler
+      Runtime: nodejs12.x
+      MemorySize: 128
+      Timeout: 100
+      Description: A Lambda function that send text to dropbox.
+      Policies:
+        - AWSLambdaBasicExecutionRole
+      Environment:
+        Variables:
+          LINE_CHANNEL_SECRET: 
+            Ref: LineChannelSecret
+          LINE_CHANNEL_ACCESS_TOKEN: 
+            Ref: LineChannelAccessToken
+          DROPBOX_ACCESS_TOKEN: 
+            Ref: DropboxAccessToken
+          DROPBOX_DIRECTORY: 
+            Ref: DropboxDirectory
+Parameters:
+  LineChannelSecret:
+    Type: String
+  LineChannelAccessToken:
+    Type: String
+  DropboxAccessToken:
+    Type: String
+  DropboxDirectory:
+    Type: String

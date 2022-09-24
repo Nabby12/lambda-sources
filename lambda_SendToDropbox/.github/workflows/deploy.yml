@@ -1,0 +1,107 @@
+
+name: Auto Deploy to AWS Lambda
+
+on:
+  pull_request:
+    branches: main
+    types: [closed]
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-20.04
+    timeout-minutes: 5
+    if: ${{ github.event.pull_request.merged == true }}
+
+    strategy:
+      matrix:
+        node-version: [12.x]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Run npm install
+        run: npm install
+
+      - name: Run unit test
+        run: npm run test
+
+  deploy:
+    needs: test
+    name: Auto Deploy
+    runs-on: ubuntu-20.04
+    timeout-minutes: 5
+    if: ${{ github.event.pull_request.merged == true }}
+
+    strategy:
+      matrix:
+        python-version: [3.8]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_FOR_GITHUB_ACTIONS_HUB_USER }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_FOR_GITHUB_ACTIONS_HUB_USER }}
+          aws-region: ${{ secrets.AWS_DEFAULT_REGION }}
+          role-to-assume: ${{ secrets.AWS_ASSUME_ROLE_ARN }}
+          role-duration-seconds: 900
+
+      - name: Set up Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install SAM
+        run: |
+          python -m pip install --upgrade pip
+          pip install aws-sam-cli
+
+      - name: Build by SAM
+        run: sam build
+
+      - name: Deploy by SAM
+        run: |
+          sam deploy \
+            --stack-name "${{ secrets.AWS_STACK_NAME }}" \
+            --s3-bucket "${{ secrets.AWS_S3_BUCKET }}" \
+            --s3-prefix "${{ secrets.AWS_S3_PREFIX }}" \
+            --region "${{ secrets.AWS_DEFAULT_REGION }}" \
+            --capabilities "${{ secrets.AWS_CAPABILITIES }}" \
+            --no-confirm-changeset \
+            --parameter-overrides \
+              LineChannelSecret="${{ secrets.LINE_CHANNEL_SECRET }}" \
+              LineChannelAccessToken="${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}" \
+              DropboxAccessToken="${{ secrets.DROPBOX_ACCESS_TOKEN }}" \
+              DropboxDirectory="${{ secrets.DROPBOX_DIRECTORY }}" \
+            2>&1 \
+            | tee error.json
+
+      - name: Check Deploy Error log
+        id: check-error
+        run: |
+          JOB_NAME="Deploy Lambda"
+          echo "::set-output name=JOB_NAME::$JOB_NAME"
+          ERROR_LOG="$(tail -n 1 error.json)"
+          if [ -n "${ERROR_LOG}" ]; then
+            NO_CHANGE_MESSAGE="No changes to deploy."
+            if [ "$(echo ${ERROR_LOG} | grep "${NO_CHANGE_MESSAGE}")" ]; then
+              JOB_NAME="no changes Deploy Lambda"
+              echo "::set-output name=JOB_NAME::$JOB_NAME"
+            else
+              exit 1
+            fi
+          fi
+
+      - name: Notify result to slack
+        uses: homoluctus/slatify@master
+        if: always()
+        with:
+          type: ${{ job.status }}
+          job_name: ${{ steps.check-error.outputs.JOB_NAME }}
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}

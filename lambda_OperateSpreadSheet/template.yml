@@ -1,0 +1,50 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: This is test funciton for operating google spreadsheet.
+Transform:
+  - AWS::Serverless-2016-10-31
+Resources:
+  OperateSpreadSheet:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src/handlers/index.handler
+      Runtime: nodejs12.x
+      MemorySize: 128
+      Timeout: 100
+      Description: This is test funciton for operating google spreadsheet.
+      Policies:
+        - AWSLambdaBasicExecutionRole
+      Environment:
+        Variables:
+          CREDENTIALS_CLIENT_ID: 
+            Ref: CredentialsClientId
+          CREDENTIALS_CLIENT_SECRET: 
+            Ref: CredentialsClientSecret
+          CREDENTIALS_REDIRECT_URI: 
+            Ref: CredentialsRedirectUri
+          REFRESH_TOKEN: 
+            Ref: RefreshToken
+          SPREADSHEET_ID: 
+            Ref: SpreadsheetId
+          SPREADSHEET_NAME: 
+            Ref: SpreadsheetName
+          SPREADSHEET_RANGE: 
+            Ref: SpreadsheetRange
+          SPREADSHEET_START_RANGE: 
+            Ref: SpreadsheetStartRange
+Parameters:
+  CredentialsClientId:
+    Type: String
+  CredentialsClientSecret:
+    Type: String
+  CredentialsRedirectUri:
+    Type: String
+  RefreshToken:
+    Type: String
+  SpreadsheetId:
+    Type: String
+  SpreadsheetName:
+    Type: String
+  SpreadsheetRange:
+    Type: String
+  SpreadsheetStartRange:
+    Type: String

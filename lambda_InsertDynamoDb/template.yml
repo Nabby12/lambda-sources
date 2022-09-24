@@ -1,0 +1,74 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: This is the Lambda function for inserting records into dynamo-db.
+Transform:
+  - AWS::Serverless-2016-10-31
+Resources:
+  insertDynamoDb:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src/handlers/index.handler
+      Runtime: nodejs12.x
+      MemorySize: 128
+      Timeout: 100
+      Description: This is the Lambda function for inserting records into dynamo-db.
+      Policies:
+        - AWSLambdaBasicExecutionRole
+      Environment:
+        Variables:
+          DYNAMO_TABLE_NAME: 
+            Ref: DynamoTableName
+          CREDENTIALS_CLIENT_ID: 
+            Ref: CredentialsClientId
+          CREDENTIALS_CLIENT_SECRET: 
+            Ref: CredentialsClientSecret
+          CREDENTIALS_REDIRECT_URI: 
+            Ref: CredentialsRedirectUri
+          REFRESH_TOKEN: 
+            Ref: RefreshToken
+          SPREADSHEET_ID: 
+            Ref: SpreadsheetId
+          SPREADSHEET_NAME: 
+            Ref: SpreadsheetName
+          SPREADSHEET_RANGE: 
+            Ref: SpreadsheetRange
+          SPREADSHEET_JAN_PHRASE_COLUMN: 
+            Ref: SpreadsheetJanPhraseColumn
+          SPREADSHEET_ENG_PHRASE_COLUMN: 
+            Ref: SpreadsheetEngPhraseColumn
+          LINE_CHANNEL_SECRET: 
+            Ref: LineChannelSecret
+          LINE_CHANNEL_ACCESS_TOKEN: 
+            Ref: LineChannelAccessToken
+          LINE_HEADER: 
+            Ref: LineHeader
+          LINE_TRIGGER_WORD: 
+            Ref: LineTriggerWord
+Parameters:
+  DynamoTableName:
+    Type: String
+  CredentialsClientId:
+    Type: String
+  CredentialsClientSecret:
+    Type: String
+  CredentialsRedirectUri:
+    Type: String
+  RefreshToken:
+    Type: String
+  SpreadsheetId:
+    Type: String
+  SpreadsheetName:
+    Type: String
+  SpreadsheetRange:
+    Type: String
+  SpreadsheetJanPhraseColumn:
+    Type: String
+  SpreadsheetEngPhraseColumn:
+    Type: String
+  LineChannelSecret:
+    Type: String
+  LineChannelAccessToken:
+    Type: String
+  LineHeader:
+    Type: String
+  LineTriggerWord:
+    Type: String
