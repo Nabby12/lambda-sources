@@ -6,3 +6,4 @@
 - lambda_InsertDynamoDb
 - lambda_OperationSpreadSheet
 - lambda_SendToDropbox
+- reminder_to_line
